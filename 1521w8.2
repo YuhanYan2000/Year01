@@ -1,45 +1,40 @@
-// Print position of first non-ASCII byte in file
+// Print on-ASCII bytes from file
 #include <stdio.h>
 #include <stdlib.h>
-int compare_files(char *pathname1, char *pathname2);
+#include <string.h>
+void process_file(char *pathname);
 int main(int argc, char *argv[]) {
-if (argc != 3) {
-fprintf(stderr, "Usage: %s <file1> <file2>\n", argv[0]);
-return 1;
+for (int arg = 1; arg < argc; arg++) {
+process_file(argv[arg]);
 }
-return compare_files(argv[1], argv[2]);
-}
-int compare_files(char *pathname1, char *pathname2) {
-FILE *stream1 = fopen(pathname1, "r");
-if (stream1 == NULL) {
-perror(pathname1);
-return 1;
-}
-FILE *stream2 = fopen(pathname2, "r");
-if (stream2 == NULL) {
-perror(pathname2);
-return 1;
-}
-ssize_t byte_position = 0;
-int byte1, byte2;
-while (1) {
-byte1 = fgetc(stream1);
-byte2 = fgetc(stream2);
-if (byte1 != byte2 || byte1 == EOF) {
-break;
-}
-byte_position++;
-}
-if (byte1 == byte2) {
-printf("Files are identical\n");
-} else if (byte1 == EOF) {
-printf("EOF on %s\n", pathname1);
-} else if (byte2 == EOF) {
-printf("EOF on %s\n", pathname2);
-} else {
-printf("Files differ at byte %zd\n", byte_position);
-}
-fclose(stream1);
-fclose(stream2);
 return 0;
+}
+void process_file(char *pathname) {
+FILE *in = fopen(pathname, "r");
+if (in == NULL) {
+perror(pathname);
+exit(1);
+}
+char *suffix = ".tmp.leave_only_ascii";
+char temporary_pathname[strlen(pathname) + strlen(suffix) + 1];
+strcpy(temporary_pathname, pathname);
+strcat(temporary_pathname, suffix);
+FILE *out = fopen(temporary_pathname, "w");
+if (out == NULL) {
+perror(pathname);
+exit(1);
+}
+int byte;
+while ((byte = fgetc(in)) != EOF) {
+if (byte <= 127) {
+fputc(byte, out);
+}
+}
+fclose(in);
+fclose(out);
+// doesn't prevserve file permissions
+if (rename(temporary_pathname, pathname) != 0) {
+perror("rename");
+exit(1);
+}
 }
