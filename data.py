@@ -24,8 +24,7 @@ def users_notes():
             'handle_str': '',
             'password': '',
             'session_secret': '',
-            'permission_id': '',
-            'profile_img_url':'',
+            'permission_id': ''
         }
     ]
 
@@ -134,12 +133,6 @@ def return_channels():
                     'u_id': 1,
                     'message': 'Hello world',
                     'time_created': 1582426789,
-                    'reacts': [{'react_id': 1,
-                    'u_ids':[],
-                    'is_this_user_reacted': False
-                },],
-                    'is_pinned': false
-                    ''
                 },
             ]
         }
